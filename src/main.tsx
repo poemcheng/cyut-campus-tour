@@ -43,6 +43,16 @@ import {
   matchesPlace,
 } from "./data";
 import "./style.css";
+import {
+  buildingSpecs,
+  buildingHeight,
+  placeLevel,
+  elevationZones,
+  floorNumbers,
+  levelLabel,
+  structureEvidence,
+} from "./structure";
+import { routeSummary, type RouteMode } from "./pathfinding";
 type Tab = "explore" | "routes" | "saved";
 function App() {
   const [selected, setSelected] = useState(() => {
@@ -54,9 +64,15 @@ function App() {
     [category, setCategory] = useState("全部"),
     [labels, setLabels] = useState(true),
     [flat, setFlat] = useState(false),
-    [dialog, setDialog] = useState<"map" | "info" | "visit" | null>(null),
+    [dialog, setDialog] = useState<
+      "map" | "info" | "visit" | "structure" | null
+    >(null),
     [mapZoom, setMapZoom] = useState(1),
     [sidebar, setSidebar] = useState(false);
+  const [heightScale, setHeightScale] = useState(2),
+    [sectionFloor, setSectionFloor] = useState<number | null>(null),
+    [routeMode, setRouteMode] = useState<RouteMode>("walk"),
+    [structureTags, setStructureTags] = useState(true);
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const d = JSON.parse(localStorage.getItem("cyut-favorites") ?? "[]");
@@ -92,6 +108,9 @@ function App() {
     tab === "saved"
       ? filtered.filter((p) => favorites.includes(p.id))
       : filtered;
+  const buildingId = place.parentId ?? place.id,
+    building = buildingSpecs[buildingId],
+    routeInfo = routeSummary(route.map(byId), routeMode);
   useEffect(() => {
     try {
       localStorage.setItem("cyut-favorites", JSON.stringify(favorites));
@@ -129,6 +148,7 @@ function App() {
   }, []);
   useEffect(() => () => window.speechSynthesis?.cancel(), []);
   function select(id: string, focus = true) {
+    if ((byId(id).parentId ?? id) !== buildingId) setSectionFloor(null);
     setSelected(id);
     if (focus) scene.current?.focus(id);
     const url = new URL(location.href);
@@ -140,6 +160,7 @@ function App() {
     setSidebar(true);
   }
   function beginRoute(ids: string[], title: string) {
+    setSectionFloor(null);
     setRoute(ids);
     setRouteTitle(title);
     setPlaying(false);
@@ -166,7 +187,9 @@ function App() {
     if (!muted && window.speechSynthesis) {
       window.speechSynthesis.cancel();
       const p = byId(route[index]),
-        utterance = new SpeechSynthesisUtterance(`${p.name}。${p.description.split('。')[0]}。`);
+        utterance = new SpeechSynthesisUtterance(
+          `${p.name}。${p.description.split("。")[0]}。`,
+        );
       utterance.lang = "zh-TW";
       window.speechSynthesis.speak(utterance);
     }
@@ -336,7 +359,11 @@ function App() {
                     </span>
                     <span className="place-name">
                       <strong>{p.name}</strong>
-                      <small>{p.parentId?`${byId(p.parentId).name} · ${p.floor}${p.room?` · ${p.room}`:''}`:p.en}</small>
+                      <small>
+                        {p.parentId
+                          ? `${byId(p.parentId).name} · ${p.floor}${p.room ? ` · ${p.room}` : ""}`
+                          : p.en}
+                      </small>
                     </span>
                     <ChevronRight size={16} />
                   </button>
@@ -484,7 +511,7 @@ function App() {
             </h2>
             <div className="map-sub">
               <span className="status-dot" />
-              互動校園導覽 <i /> 3D 量體示意
+              立體地形 · 樓層結構 <i /> 尺寸推估
             </div>
           </div>
           <CampusScene
@@ -495,6 +522,10 @@ function App() {
             route={route}
             flat={flat}
             playing={playing}
+            heightScale={heightScale}
+            sectionFloor={sectionFloor}
+            routeMode={routeMode}
+            structureTags={structureTags}
             onSelect={(id) => select(id)}
             onProgress={progressTo}
             onEnd={stop}
@@ -513,6 +544,14 @@ function App() {
               >
                 俯視
               </button>
+              <button
+                onClick={() => {
+                  setFlat(false);
+                  scene.current?.side();
+                }}
+              >
+                側視高差
+              </button>
             </div>
             <button
               className={`label-toggle ${labels ? "active" : ""}`}
@@ -523,6 +562,41 @@ function App() {
               地點標籤
             </button>
           </div>
+          <section className={`terrain-panel ${sectionFloor!==null||route.length>0?'compact':''}`} aria-label="地形高程控制">
+            <div>
+              <strong>階地校園</strong>
+              <button onClick={() => setDialog("structure")}>
+                圖資與推估 <Info size={12} />
+              </button>
+            </div>
+            <div className="elevation-steps">
+              {elevationZones.slice(1).map((z) => (
+                <span key={z.id} style={{ borderColor: z.color }}>
+                  <b>+{z.level}m</b>
+                  <small>第 {z.id} 區</small>
+                </span>
+              ))}
+            </div>
+            <label>
+              地形垂直顯示
+              <select
+                aria-label="地形垂直倍率"
+                value={heightScale}
+                onChange={(e) => setHeightScale(Number(e.target.value))}
+              >
+                <option value={1}>1×</option>
+                <option value={2}>2×（強調高差）</option>
+              </select>
+            </label>
+            <button
+              className="structure-tag-toggle"
+              aria-pressed={structureTags}
+              onClick={() => setStructureTags(!structureTags)}
+            >
+              {structureTags ? "隱藏" : "顯示"}樓梯標示
+            </button>
+            <p>區段落差依官方圖 · 相對零點及尺寸推估</p>
+          </section>
           <div className="map-tools">
             <button
               title="放大"
@@ -601,7 +675,85 @@ function App() {
                 <span key={h}>{h}</span>
               ))}
             </div>
-            {place.parentId ? <div className="indoor-location"><MapPin size={14}/><span>{byId(place.parentId).name} · {place.floor}{place.room?` · ${place.room}`:''}<small>3D 標記位於所屬大樓；入館後請依樓層及房號前往。</small></span><button onClick={()=>select(place.parentId!)}>查看大樓<ChevronRight size={13}/></button></div>:halls.some(h=>h.parentId===place.id)&&<div className="building-halls"><span>本棟演講廳與禮堂</span><div>{halls.filter(h=>h.parentId===place.id).map(h=><button key={h.id} onClick={()=>select(h.id)}>{h.room??h.floor} · {h.name}<ChevronRight size={12}/></button>)}</div></div>}
+            {building && (
+              <section className="structure-card" aria-label="建築樓層結構">
+                <div>
+                  <strong>樓層與結構</strong>
+                  <span>
+                    {building.floors}F
+                    {building.basements ? ` / B${building.basements}` : ""}
+                  </span>
+                </div>
+                <label>
+                  建築剖視
+                  <select
+                    aria-label="建築樓層剖視"
+                    value={sectionFloor ?? "all"}
+                    onChange={(e) =>
+                      setSectionFloor(
+                        e.target.value === "all"
+                          ? null
+                          : Number(e.target.value),
+                      )
+                    }
+                  >
+                    <option value="all">完整外觀</option>
+                    {floorNumbers(building).map((f) => (
+                      <option key={f} value={f}>
+                        {levelLabel(f)} 剖視
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {place.parentId && (
+                  <button
+                    onClick={() =>
+                      setSectionFloor(parseInt(place.floor ?? "1"))
+                    }
+                  >
+                    查看 {place.floor} 廳館樓層 <Layers size={13} />
+                  </button>
+                )}
+                <small>
+                  區域相對高程 +{building.level}m · 層高與室內梯間推估
+                </small>
+                {sectionFloor !== null && (
+                  <p>
+                    剖視顯示樓板、柱、兩跑樓梯與電梯核心；平面配置及房間位置未測繪。
+                  </p>
+                )}
+              </section>
+            )}
+            {place.parentId ? (
+              <div className="indoor-location">
+                <MapPin size={14} />
+                <span>
+                  {byId(place.parentId).name} · {place.floor}
+                  {place.room ? ` · ${place.room}` : ""}
+                  <small>標記呈現所在樓層；房間精確位置未測繪。</small>
+                </span>
+                <button onClick={() => select(place.parentId!)}>
+                  查看大樓
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            ) : (
+              halls.some((h) => h.parentId === place.id) && (
+                <div className="building-halls">
+                  <span>本棟演講廳與禮堂</span>
+                  <div>
+                    {halls
+                      .filter((h) => h.parentId === place.id)
+                      .map((h) => (
+                        <button key={h.id} onClick={() => select(h.id)}>
+                          {h.room ?? h.floor} · {h.name}
+                          <ChevronRight size={12} />
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )
+            )}
             <div className="detail-actions">
               <button
                 className="primary"
@@ -683,6 +835,26 @@ function App() {
                 </button>
                 <small>參訪順序・路線為示意</small>
               </div>
+              <div className="route-mode-control">
+                <button
+                  className={routeMode === "walk" ? "active" : ""}
+                  onClick={() => setRouteMode("walk")}
+                >
+                  一般步行
+                </button>
+                <button
+                  className={routeMode === "avoid-stairs" ? "active" : ""}
+                  onClick={() => setRouteMode("avoid-stairs")}
+                >
+                  避開樓梯（示意）
+                </button>
+                <span>
+                  階梯 {routeInfo.stairs} 段 · 坡道 {routeInfo.slopes} 段
+                </span>
+              </div>
+              <p className="route-height-note">
+                路線隨模型高程起伏；避階示意不代表已驗證的無障礙通路。
+              </p>
             </section>
           )}
           <div className="map-bottom">
@@ -725,9 +897,11 @@ function App() {
             <h2>
               {dialog === "map"
                 ? "官方校園平面圖"
-                : dialog === "visit"
-                  ? "下一站，朝陽。"
-                  : "關於這份校園導覽"}
+                : dialog === "structure"
+                  ? "校園高程與結構依據"
+                  : dialog === "visit"
+                    ? "下一站，朝陽。"
+                    : "關於這份校園導覽"}
             </h2>
           </div>
           <button
@@ -763,12 +937,73 @@ function App() {
             </div>
             <div className="official-image">
               <img
-                  src="./assets/official-campus-map.jpg"
+                src="./assets/official-campus-map.jpg"
                 alt="朝陽科技大學官方校園平面圖，標示建築、運動設施、停車場及校門位置"
                 style={{ width: `${mapZoom * 100}%` }}
               />
             </div>
           </>
+        ) : dialog === "structure" ? (
+          <div className="dialog-body">
+            <h3>官方圖可確認的區段落差</h3>
+            <p>{structureEvidence.confirmed}</p>
+            <table className="height-table">
+              <thead>
+                <tr>
+                  <th>區段</th>
+                  <th>圖示落差</th>
+                  <th>模型相對高程</th>
+                </tr>
+              </thead>
+              <tbody>
+                {elevationZones.slice(1).map((z) => (
+                  <tr key={z.id}>
+                    <td>{z.name}</td>
+                    <td>{z.rise}m</td>
+                    <td>+{z.level}m</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p>
+              相對高程為依區段順序累加的模型設定，不是校方提供的絕對標高；地形預設以
+              2× 垂直倍率呈現，可切回 1×。
+            </p>
+            <h3>重建內容與推估範圍</h3>
+            <p>
+              地形、階地、坡道、中央階梯、建築翼樓、中庭、入口門廊、樓板、梁柱、兩跑樓梯、平台與電梯核心。樓層及廳館所在樓層可由官方資料核對；
+              {structureEvidence.inferred}
+            </p>
+            <p>
+              剖視是用來理解樓層關係的結構示意，未提供精確室內房間平面或逐步室內導航。
+            </p>
+            <div className="source-links">
+              <a
+                href={structureEvidence.access}
+                target="_blank"
+                rel="noreferrer"
+              >
+                官方無障礙設施圖（含區段落差）
+                <ArrowUpRight size={14} />
+              </a>
+              <a
+                href={structureEvidence.perspective}
+                target="_blank"
+                rel="noreferrer"
+              >
+                官方校園透視圖
+                <ArrowUpRight size={14} />
+              </a>
+              <a
+                href={structureEvidence.floors}
+                target="_blank"
+                rel="noreferrer"
+              >
+                官方各大樓樓層簡介
+                <ArrowUpRight size={14} />
+              </a>
+            </div>
+          </div>
         ) : dialog === "visit" ? (
           <div className="dialog-body">
             <div className="visit-banner">
@@ -837,8 +1072,14 @@ function App() {
               {[
                 ["校園平面圖", official.map],
                 ["各大樓樓層介紹", official.floors],
-                ["演講廳與禮堂位置（114 學年度）", "https://www.cyut.edu.tw/114gra/"],
-                ["圖書館演講廳場地介紹", "https://cyutis.cyut.edu.tw/TSLibrarySpace/Home/SiteIntro"],
+                [
+                  "演講廳與禮堂位置（114 學年度）",
+                  "https://www.cyut.edu.tw/114gra/",
+                ],
+                [
+                  "圖書館演講廳場地介紹",
+                  "https://cyutis.cyut.edu.tw/TSLibrarySpace/Home/SiteIntro",
+                ],
                 ["波錠紀念圖書館", "https://www.lib.cyut.edu.tw/"],
                 ["電腦教室分布", "https://pmlis.cyut.edu.tw/pcroom.php"],
                 ["學校官網與聯絡資訊", official.home],

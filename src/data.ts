@@ -60,7 +60,7 @@ export const campusPlaces: Place[] = [
     w: 43,
     d: 18,
     h: 18,
-    node: "c3",
+    node: "b",
     description:
       "到校洽公與認識校務服務的重要地點。前往辦理業務前，建議先從學校官網確認承辦單位與辦公位置。",
     highlights: ["校務服務", "訪客洽公", "請先確認承辦單位"],
@@ -77,7 +77,7 @@ export const campusPlaces: Place[] = [
     d: 39,
     h: 26,
     code: "E",
-    node: "l2",
+    node: "c3",
     description:
       "理工教學與研究的空間。官方樓層介紹列有專業教室、研究室與實驗相關設施，參訪時請遵守各教室及實驗室的出入規範。",
     highlights: ["專業教室", "研究與實作", "教室代碼 E"],
@@ -94,7 +94,7 @@ export const campusPlaces: Place[] = [
     d: 34,
     h: 29,
     code: "T1",
-    node: "l1",
+    node: "l0",
     description:
       "日常上課與自主學習的場域。大樓設有普通教室、語言教室與自主學習區，波錠廳位於二樓。",
     highlights: ["普通與語言教室", "自主學習區", "二樓波錠廳"],
@@ -177,7 +177,7 @@ export const campusPlaces: Place[] = [
     d: 24,
     h: 22,
     code: "V",
-    node: "l0",
+    node: "west-high",
     description:
       "從校園認識航空領域。航空大樓列於官方校園圖，圖資處亦列有大樓內的電腦實習教室；專業設施參訪請先洽校方。",
     highlights: ["航空領域", "專業教學", "教室代碼 V"],
@@ -193,7 +193,7 @@ export const campusPlaces: Place[] = [
     w: 54,
     d: 26,
     h: 24,
-    node: "c0",
+    node: "north",
     description:
       "校內住宿生活的據點。官方校園圖標示宿舍大樓及餐飲、便利商店；住宿規定、申請及出入資訊請依學校公告。",
     highlights: ["校內住宿", "餐飲與便利商店", "住宿區請尊重隱私"],
@@ -209,7 +209,7 @@ export const campusPlaces: Place[] = [
     w: 31,
     d: 28,
     h: 0,
-    node: "c2",
+    node: "c3",
     description:
       "位在行政大樓前方的開放廣場。把步調放慢，從這裡看看周圍的理工、資訊與行政建築，感受校園日常。",
     highlights: ["校園散步", "開放空間", "建築觀察"],
@@ -312,32 +312,191 @@ export const campusPlaces: Place[] = [
     source: official.map,
   },
 ];
-interface HallSpec {id:string;name:string;en:string;parentId:string;floor:string;room?:string;source:string;description:string;}
-const graduationSource = 'https://www.cyut.edu.tw/114gra/';
-const designSource = 'https://web.cyut.edu.tw/p/405-1000-18936,c4556.php?Lang=zh-tw';
-const hallSpecs:HallSpec[] = [
-  {id:'poding-hall',name:'波錠廳',en:'Poding Hall',parentId:'teaching',floor:'2F',room:'T1-206',source:graduationSource,description:'位於教學大樓二樓的演講與典禮場地。請先抵達教學大樓，再依二樓 T1-206 指標尋找波錠廳；此處與圖書館的波錠紀念廳不同。'},
-  {id:'design-auditorium',name:'設計大樓禮堂',en:'Design Building Auditorium',parentId:'design',floor:'1F',room:'D-127',source:graduationSource,description:'位於設計大樓一樓，是校級典禮與活動使用的禮堂。參加活動時，請確認主辦單位公告的入場位置及開放時間。'},
-  {id:'sung-hall',name:'時選廳',en:'Sung’s Hall',parentId:'management',floor:'3F',room:'T2-305',source:graduationSource,description:'位於管理大樓三樓的廳館，亦為校方畢業典禮活動列示場地。到達管理大樓後，請依 T2-305 房號及現場指標前往。'},
-  {id:'yang-hall',name:'天生廳',en:'Yang’s Hall',parentId:'management',floor:'4F',room:'T2-405',source:graduationSource,description:'位於管理大樓四樓的演講與活動場地。請依 T2-405 房號尋找天生廳，活動入場與場地使用以主辦單位公告為準。'},
-  {id:'chang-hall',name:'美智廳',en:'Chang’s Hall',parentId:'management',floor:'6F',room:'T2-606',source:graduationSource,description:'位於管理大樓六樓的廳館。參加演講或典禮時，請先確認活動通知，再依 T2-606 房號與現場指引前往。'},
-  {id:'library-lecture',name:'圖書館一樓演講廳',en:'Library Lecture Hall',parentId:'library',floor:'1F',source:'https://cyutis.cyut.edu.tw/TSLibrarySpace/Home/SiteIntro',description:'位於波錠紀念圖書館一樓的演講與活動空間。官方場地介紹列有此演講廳；場地借用、設備與入場規範請查閱圖書館公告。'},
-  {id:'science-e103',name:'理工大樓演講廳',en:'Science & Engineering Lecture Hall',parentId:'science',floor:'1F',room:'E-103',source:'https://web.cyut.edu.tw/p/404-1000-18934.php?Lang=zh-tw',description:'位於理工大樓一樓 E-103。先抵達理工大樓，再依一樓房號與活動通知尋找演講廳；教室與設施使用依校方管理。'},
-  {id:'management-t2104',name:'管理大樓演講廳',en:'Management Lecture Hall',parentId:'management',floor:'1F',room:'T2-104',source:'https://web.cyut.edu.tw/p/405-1000-18937,c4556.php?Lang=zh-tw',description:'位於管理大樓一樓 T2-104，與三樓時選廳、四樓天生廳及六樓美智廳為不同場地。請依房號確認活動地點。'},
-  {id:'design-d202',name:'設計大樓 D-202 演講廳',en:'Design Lecture Hall D-202',parentId:'design',floor:'2F',room:'D-202',source:designSource,description:'設計大樓二樓的演講廳之一，房號 D-202。校方將 D-202 至 D-204 分別列為演講廳，請依活動通知確認正確房間。'},
-  {id:'design-d203',name:'設計大樓 D-203 演講廳',en:'Design Lecture Hall D-203',parentId:'design',floor:'2F',room:'D-203',source:designSource,description:'位於設計大樓二樓 D-203。此處與相鄰的 D-202、D-204 各自獨立；請依現場房號及活動公告確認入口。'},
-  {id:'design-d204',name:'設計大樓 D-204 演講廳',en:'Design Lecture Hall D-204',parentId:'design',floor:'2F',room:'D-204',source:designSource,description:'位於設計大樓二樓 D-204，屬官方樓層介紹列示的演講廳。前往參加活動時，請依二樓房號與主辦單位指引入場。'},
-  {id:'aviation-conference',name:'航空大樓國際會議廳',en:'Aviation International Conference Hall',parentId:'aviation',floor:'5F',room:'V-501',source:graduationSource,description:'位於航空大樓五樓 V-501 的國際會議廳，也是校方典禮活動列示場地。抵達航空大樓後，請依五樓與會議廳指標前往。'},
-  {id:'admin-conference',name:'行政大樓六樓會議廳',en:'Administration Conference Hall',parentId:'admin',floor:'6F',source:'https://web.cyut.edu.tw/p/405-1000-18931,c4556.php?Lang=zh-tw',description:'官方行政大樓樓層介紹列示的六樓會議廳。參與演講、會議或校務活動前，請確認活動通知與入場安排。'},
+interface HallSpec {
+  id: string;
+  name: string;
+  en: string;
+  parentId: string;
+  floor: string;
+  room?: string;
+  source: string;
+  description: string;
+}
+const graduationSource = "https://www.cyut.edu.tw/114gra/";
+const designSource =
+  "https://web.cyut.edu.tw/p/405-1000-18936,c4556.php?Lang=zh-tw";
+const hallSpecs: HallSpec[] = [
+  {
+    id: "poding-hall",
+    name: "波錠廳",
+    en: "Poding Hall",
+    parentId: "teaching",
+    floor: "2F",
+    room: "T1-206",
+    source: graduationSource,
+    description:
+      "位於教學大樓二樓的演講與典禮場地。請先抵達教學大樓，再依二樓 T1-206 指標尋找波錠廳；此處與圖書館的波錠紀念廳不同。",
+  },
+  {
+    id: "design-auditorium",
+    name: "設計大樓禮堂",
+    en: "Design Building Auditorium",
+    parentId: "design",
+    floor: "1F",
+    room: "D-127",
+    source: graduationSource,
+    description:
+      "位於設計大樓一樓，是校級典禮與活動使用的禮堂。參加活動時，請確認主辦單位公告的入場位置及開放時間。",
+  },
+  {
+    id: "sung-hall",
+    name: "時選廳",
+    en: "Sung’s Hall",
+    parentId: "management",
+    floor: "3F",
+    room: "T2-305",
+    source: graduationSource,
+    description:
+      "位於管理大樓三樓的廳館，亦為校方畢業典禮活動列示場地。到達管理大樓後，請依 T2-305 房號及現場指標前往。",
+  },
+  {
+    id: "yang-hall",
+    name: "天生廳",
+    en: "Yang’s Hall",
+    parentId: "management",
+    floor: "4F",
+    room: "T2-405",
+    source: graduationSource,
+    description:
+      "位於管理大樓四樓的演講與活動場地。請依 T2-405 房號尋找天生廳，活動入場與場地使用以主辦單位公告為準。",
+  },
+  {
+    id: "chang-hall",
+    name: "美智廳",
+    en: "Chang’s Hall",
+    parentId: "management",
+    floor: "6F",
+    room: "T2-606",
+    source: graduationSource,
+    description:
+      "位於管理大樓六樓的廳館。參加演講或典禮時，請先確認活動通知，再依 T2-606 房號與現場指引前往。",
+  },
+  {
+    id: "library-lecture",
+    name: "圖書館一樓演講廳",
+    en: "Library Lecture Hall",
+    parentId: "library",
+    floor: "1F",
+    source: "https://cyutis.cyut.edu.tw/TSLibrarySpace/Home/SiteIntro",
+    description:
+      "位於波錠紀念圖書館一樓的演講與活動空間。官方場地介紹列有此演講廳；場地借用、設備與入場規範請查閱圖書館公告。",
+  },
+  {
+    id: "science-e103",
+    name: "理工大樓演講廳",
+    en: "Science & Engineering Lecture Hall",
+    parentId: "science",
+    floor: "1F",
+    room: "E-103",
+    source: "https://web.cyut.edu.tw/p/404-1000-18934.php?Lang=zh-tw",
+    description:
+      "位於理工大樓一樓 E-103。先抵達理工大樓，再依一樓房號與活動通知尋找演講廳；教室與設施使用依校方管理。",
+  },
+  {
+    id: "management-t2104",
+    name: "管理大樓演講廳",
+    en: "Management Lecture Hall",
+    parentId: "management",
+    floor: "1F",
+    room: "T2-104",
+    source: "https://web.cyut.edu.tw/p/405-1000-18937,c4556.php?Lang=zh-tw",
+    description:
+      "位於管理大樓一樓 T2-104，與三樓時選廳、四樓天生廳及六樓美智廳為不同場地。請依房號確認活動地點。",
+  },
+  {
+    id: "design-d202",
+    name: "設計大樓 D-202 演講廳",
+    en: "Design Lecture Hall D-202",
+    parentId: "design",
+    floor: "2F",
+    room: "D-202",
+    source: designSource,
+    description:
+      "設計大樓二樓的演講廳之一，房號 D-202。校方將 D-202 至 D-204 分別列為演講廳，請依活動通知確認正確房間。",
+  },
+  {
+    id: "design-d203",
+    name: "設計大樓 D-203 演講廳",
+    en: "Design Lecture Hall D-203",
+    parentId: "design",
+    floor: "2F",
+    room: "D-203",
+    source: designSource,
+    description:
+      "位於設計大樓二樓 D-203。此處與相鄰的 D-202、D-204 各自獨立；請依現場房號及活動公告確認入口。",
+  },
+  {
+    id: "design-d204",
+    name: "設計大樓 D-204 演講廳",
+    en: "Design Lecture Hall D-204",
+    parentId: "design",
+    floor: "2F",
+    room: "D-204",
+    source: designSource,
+    description:
+      "位於設計大樓二樓 D-204，屬官方樓層介紹列示的演講廳。前往參加活動時，請依二樓房號與主辦單位指引入場。",
+  },
+  {
+    id: "aviation-conference",
+    name: "航空大樓國際會議廳",
+    en: "Aviation International Conference Hall",
+    parentId: "aviation",
+    floor: "5F",
+    room: "V-501",
+    source: graduationSource,
+    description:
+      "位於航空大樓五樓 V-501 的國際會議廳，也是校方典禮活動列示場地。抵達航空大樓後，請依五樓與會議廳指標前往。",
+  },
+  {
+    id: "admin-conference",
+    name: "行政大樓六樓會議廳",
+    en: "Administration Conference Hall",
+    parentId: "admin",
+    floor: "6F",
+    source: "https://web.cyut.edu.tw/p/405-1000-18931,c4556.php?Lang=zh-tw",
+    description:
+      "官方行政大樓樓層介紹列示的六樓會議廳。參與演講、會議或校務活動前，請確認活動通知與入場安排。",
+  },
 ];
-export const halls:Place[]=hallSpecs.map(spec=>{
-  const parent=campusPlaces.find(p=>p.id===spec.parentId)!;
-  return {...parent,...spec,category:'演講廳與禮堂',code:spec.room,highlights:[parent.name,spec.floor,...(spec.room?[spec.room]:[]),'室內地點'],aliases:['演講廳','禮堂','會議廳',parent.name],};
+export const halls: Place[] = hallSpecs.map((spec) => {
+  const parent = campusPlaces.find((p) => p.id === spec.parentId)!;
+  return {
+    ...parent,
+    ...spec,
+    category: "演講廳與禮堂",
+    code: spec.room,
+    highlights: [
+      parent.name,
+      spec.floor,
+      ...(spec.room ? [spec.room] : []),
+      "室內地點",
+    ],
+    aliases: ["演講廳", "禮堂", "會議廳", parent.name],
+  };
 });
-export const places:Place[]=[...campusPlaces,...halls];
-export function matchesPlace(p:Place,query:string){
-  const normalize=(s:string)=>s.toLowerCase().replace(/[\s\-－–]/g,'');
-  return normalize([p.name,p.en,p.code??'',p.floor??'',...p.highlights,...(p.aliases??[])].join(' ')).includes(normalize(query));
+export const places: Place[] = [...campusPlaces, ...halls];
+export function matchesPlace(p: Place, query: string) {
+  const normalize = (s: string) => s.toLowerCase().replace(/[\s\-－–]/g, "");
+  return normalize(
+    [
+      p.name,
+      p.en,
+      p.code ?? "",
+      p.floor ?? "",
+      ...p.highlights,
+      ...(p.aliases ?? []),
+    ].join(" "),
+  ).includes(normalize(query));
 }
 export const categories: Category[] = [
   "演講廳與禮堂",
