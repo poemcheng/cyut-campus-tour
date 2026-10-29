@@ -1,5 +1,6 @@
 import { places, campusPlaces, halls, matchesPlace } from "./data.ts";
 import { nodes } from "./pathfinding.ts";
+import { iemResources, iemYears, iemPaths } from "./iem.ts";
 const assert = (v: boolean, m: string) => {
   if (!v) throw new Error(m);
 };
@@ -57,5 +58,50 @@ assert(
   "All halls discoverable through lecture hall search",
 );
 console.log(
-  "PASS: 30 unique places, 13 verified halls, 11 room codes, parent building and route links, official evidence, normalized search.",
+  `PASS: ${places.length} unique places, 13 verified halls, 11 room codes, parent building and route links, official evidence, normalized search.`,
+);
+assert(
+  iemResources.filter((r) => r.kind === "實驗與實習").length === 10,
+  "Ten officially listed practical learning spaces",
+);
+for (const r of iemResources) {
+  assert(
+    new URL(r.source).hostname === "iem.cyut.edu.tw",
+    "Official departmental resource evidence",
+  );
+  if (r.parentId) {
+    const p = places.find((p) => p.id === r.id);
+    assert(
+      !!p && p.room === r.room && p.floor === r.floor,
+      "Resource room and floor must match map entry",
+    );
+    assert(
+      p!.node === campusPlaces.find((p) => p.id === r.parentId)!.node,
+      "Indoor resources route to their host building",
+    );
+    assert(
+      matchesPlace(p!, r.room.replace("-", "")),
+      "Room search supports normalized identifiers",
+    );
+  } else
+    assert(
+      !places.some((p) => p.id === r.id),
+      "Unconfirmed C-101 building must not be invented",
+    );
+}
+for (const ids of [
+  ...iemYears.flatMap((y) => y.core.map((c) => c.resources)),
+  ...iemPaths.map((p) => p.resources),
+])
+  for (const id of ids)
+    assert(
+      iemResources.some((r) => r.id === id),
+      "Course and learning direction resource links resolve",
+    );
+assert(
+  iemYears.map((y) => y.year).join(",") === "1,2,3,4",
+  "Four undergraduate stages",
+);
+console.log(
+  "PASS: 14 IEM resources, 13 verified building links, unlocated C-101 excluded from map, all course-to-resource references resolve.",
 );

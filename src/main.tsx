@@ -55,6 +55,7 @@ import {
   structureEvidence,
 } from "./structure";
 import { routeSummary, type RouteMode } from "./pathfinding";
+import { IemGuide } from "./IemGuide";
 type Tab = "explore" | "routes" | "saved";
 function App() {
   const [selected, setSelected] = useState(() => {
@@ -67,8 +68,12 @@ function App() {
     [labels, setLabels] = useState(true),
     [flat, setFlat] = useState(false),
     [dialog, setDialog] = useState<
-      "map" | "info" | "visit" | "structure" | null
-    >(null),
+      "map" | "info" | "visit" | "structure" | "iem" | null
+    >(
+      new URLSearchParams(location.search).get("guide") === "iem"
+        ? "iem"
+        : null,
+    ),
     [mapZoom, setMapZoom] = useState(1),
     [sidebar, setSidebar] = useState(false);
   const [heightScale, setHeightScale] = useState(2),
@@ -122,6 +127,10 @@ function App() {
     } catch {}
   }, [favorites]);
   useEffect(() => {
+    const url = new URL(location.href);
+    if (dialog === "iem") url.searchParams.set("guide", "iem");
+    else url.searchParams.delete("guide");
+    history.replaceState(null, "", url);
     if (dialog) {
       restoreFocus.current = document.activeElement as HTMLElement;
       modal.current?.showModal();
@@ -240,8 +249,15 @@ function App() {
             主題路線
           </button>
           <button onClick={() => setDialog("visit")}>來訪資訊</button>
+          <button onClick={() => setDialog("iem")}>工管系資源</button>
         </nav>
         <div className="header-right">
+          <button
+            className="iem-mobile-shortcut"
+            onClick={() => setDialog("iem")}
+          >
+            工管系
+          </button>
           <span className="location">
             <MapPin size={14} />
             臺中・霧峰
@@ -317,6 +333,20 @@ function App() {
               )}
             </button>
           </div>
+          <button
+            className="iem-sidebar-entry"
+            onClick={() => setDialog("iem")}
+          >
+            <BookOpen size={17} />
+            <span>
+              工管系學習資源<small>教室・設備・四年課程</small>
+            </span>
+            <ArrowUpRight size={16} />
+          </button>
+          <button className="iem-sidebar-map" onClick={() => setDialog("map")}>
+            <Map size={14} />
+            官方校園圖
+          </button>
           {tab !== "routes" ? (
             <>
               <div className="search">
@@ -573,15 +603,28 @@ function App() {
               <span>地點標籤</span>
             </button>
           </div>
-          <section className={`terrain-panel ${!terrainExpanded&&(sectionFloor!==null||route.length>0)?'compact':''} ${terrainExpanded?'mobile-expanded':''}`} aria-label="地形高程控制">
+          <section
+            className={`terrain-panel ${!terrainExpanded && (sectionFloor !== null || route.length > 0) ? "compact" : ""} ${terrainExpanded ? "mobile-expanded" : ""}`}
+            aria-label="地形高程控制"
+          >
             <div>
               <strong>階地校園</strong>
-              <button className="mobile-panel-toggle terrain-toggle" aria-expanded={terrainExpanded} aria-label={terrainExpanded?'收合地形控制':'展開地形控制'} onClick={() => {
-                setTerrainExpanded(!terrainExpanded);
-                setDetailExpanded(false);
-                setRouteExpanded(false);
-              }}>
-                {terrainExpanded?'收合地形':'地形'} {terrainExpanded?<ChevronUp size={14}/>:<ChevronDown size={14}/>}
+              <button
+                className="mobile-panel-toggle terrain-toggle"
+                aria-expanded={terrainExpanded}
+                aria-label={terrainExpanded ? "收合地形控制" : "展開地形控制"}
+                onClick={() => {
+                  setTerrainExpanded(!terrainExpanded);
+                  setDetailExpanded(false);
+                  setRouteExpanded(false);
+                }}
+              >
+                {terrainExpanded ? "收合地形" : "地形"}{" "}
+                {terrainExpanded ? (
+                  <ChevronUp size={14} />
+                ) : (
+                  <ChevronDown size={14} />
+                )}
               </button>
               <button onClick={() => setDialog("structure")}>
                 圖資與推估 <Info size={12} />
@@ -660,32 +703,48 @@ function App() {
             <Compass size={29} strokeWidth={1} />
             <span>依校園圖配置</span>
           </div>
-          <article className={`detail-card ${detailExpanded?'expanded':''}`} key={selected} aria-label="地點詳情">
+          <article
+            className={`detail-card ${detailExpanded ? "expanded" : ""}`}
+            key={selected}
+            aria-label="地點詳情"
+          >
             <div className="detail-overline">
               <span>
                 <i style={{ background: categoryColor[place.category] }} />
                 {place.category}
               </span>
               <div className="detail-controls">
-              <button className="mobile-panel-toggle" aria-expanded={detailExpanded} aria-controls="place-detail-body" onClick={() => {
-                setDetailExpanded(!detailExpanded);
-                setTerrainExpanded(false);
-              }}>
-                {detailExpanded?'收合詳情':'展開詳情'} {detailExpanded?<ChevronDown size={15}/>:<ChevronUp size={15}/>}
-              </button>
-              <button
-                aria-label={
-                  favorites.includes(selected) ? "取消收藏" : "收藏此地點"
-                }
-                aria-pressed={favorites.includes(selected)}
-                onClick={() => toggleFavorite(selected)}
-                className={`icon-btn heart ${favorites.includes(selected) ? "saved" : ""}`}
-              >
-                <Heart
-                  size={18}
-                  fill={favorites.includes(selected) ? "currentColor" : "none"}
-                />
-              </button>
+                <button
+                  className="mobile-panel-toggle"
+                  aria-expanded={detailExpanded}
+                  aria-controls="place-detail-body"
+                  onClick={() => {
+                    setDetailExpanded(!detailExpanded);
+                    setTerrainExpanded(false);
+                  }}
+                >
+                  {detailExpanded ? "收合詳情" : "展開詳情"}{" "}
+                  {detailExpanded ? (
+                    <ChevronDown size={15} />
+                  ) : (
+                    <ChevronUp size={15} />
+                  )}
+                </button>
+                <button
+                  aria-label={
+                    favorites.includes(selected) ? "取消收藏" : "收藏此地點"
+                  }
+                  aria-pressed={favorites.includes(selected)}
+                  onClick={() => toggleFavorite(selected)}
+                  className={`icon-btn heart ${favorites.includes(selected) ? "saved" : ""}`}
+                >
+                  <Heart
+                    size={18}
+                    fill={
+                      favorites.includes(selected) ? "currentColor" : "none"
+                    }
+                  />
+                </button>
               </div>
             </div>
             <div className="detail-title">
@@ -696,122 +755,144 @@ function App() {
               </h2>
             </div>
             <div className="detail-body" id="place-detail-body">
-            <p>{place.description}</p>
-            <div className="highlights">
-              {place.highlights.map((h) => (
-                <span key={h}>{h}</span>
-              ))}
-            </div>
-            {building && (
-              <section className="structure-card" aria-label="建築樓層結構">
-                <div>
-                  <strong>樓層與結構</strong>
-                  <span>
-                    {building.floors}F
-                    {building.basements ? ` / B${building.basements}` : ""}
-                  </span>
-                </div>
-                <label>
-                  建築剖視
-                  <select
-                    aria-label="建築樓層剖視"
-                    value={sectionFloor ?? "all"}
-                    onChange={(e) =>
-                      setSectionFloor(
-                        e.target.value === "all"
-                          ? null
-                          : Number(e.target.value),
-                      )
-                    }
-                  >
-                    <option value="all">完整外觀</option>
-                    {floorNumbers(building).map((f) => (
-                      <option key={f} value={f}>
-                        {levelLabel(f)} 剖視
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {place.parentId && (
-                  <button
-                    onClick={() =>
-                      setSectionFloor(parseInt(place.floor ?? "1"))
-                    }
-                  >
-                    查看 {place.floor} 廳館樓層 <Layers size={13} />
-                  </button>
-                )}
-                <small>
-                  區域相對高程 +{building.level}m · 層高與室內梯間推估
-                </small>
-                {sectionFloor !== null && (
-                  <p>
-                    剖視顯示樓板、柱、兩跑樓梯與電梯核心；平面配置及房間位置未測繪。
-                  </p>
-                )}
-              </section>
-            )}
-            {place.parentId ? (
-              <div className="indoor-location">
-                <MapPin size={14} />
-                <span>
-                  {byId(place.parentId).name} · {place.floor}
-                  {place.room ? ` · ${place.room}` : ""}
-                  <small>標記呈現所在樓層；房間精確位置未測繪。</small>
-                </span>
-                <button onClick={() => select(place.parentId!)}>
-                  查看大樓
-                  <ChevronRight size={13} />
+              {(place.category === "工管系資源" || place.id === "science") && (
+                <button
+                  className="iem-detail-link"
+                  onClick={() => setDialog("iem")}
+                >
+                  查看工管系課程與設備 <ArrowUpRight size={14} />
                 </button>
+              )}
+              <p>{place.description}</p>
+              <div className="highlights">
+                {place.highlights.map((h) => (
+                  <span key={h}>{h}</span>
+                ))}
               </div>
-            ) : (
-              halls.some((h) => h.parentId === place.id) && (
-                <div className="building-halls">
-                  <span>本棟演講廳與禮堂</span>
+              {building && (
+                <section className="structure-card" aria-label="建築樓層結構">
                   <div>
-                    {halls
-                      .filter((h) => h.parentId === place.id)
-                      .map((h) => (
-                        <button key={h.id} onClick={() => select(h.id)}>
-                          {h.room ?? h.floor} · {h.name}
-                          <ChevronRight size={12} />
-                        </button>
-                      ))}
+                    <strong>樓層與結構</strong>
+                    <span>
+                      {building.floors}F
+                      {building.basements ? ` / B${building.basements}` : ""}
+                    </span>
                   </div>
+                  <label>
+                    建築剖視
+                    <select
+                      aria-label="建築樓層剖視"
+                      value={sectionFloor ?? "all"}
+                      onChange={(e) =>
+                        setSectionFloor(
+                          e.target.value === "all"
+                            ? null
+                            : Number(e.target.value),
+                        )
+                      }
+                    >
+                      <option value="all">完整外觀</option>
+                      {floorNumbers(building).map((f) => (
+                        <option key={f} value={f}>
+                          {levelLabel(f)} 剖視
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {place.parentId && (
+                    <button
+                      onClick={() =>
+                        setSectionFloor(parseInt(place.floor ?? "1"))
+                      }
+                    >
+                      查看 {place.floor}{" "}
+                      {place.category === "工管系資源" ? "資源" : "廳館"}樓層{" "}
+                      <Layers size={13} />
+                    </button>
+                  )}
+                  <small>
+                    區域相對高程 +{building.level}m · 層高與室內梯間推估
+                  </small>
+                  {sectionFloor !== null && (
+                    <p>
+                      剖視顯示樓板、柱、兩跑樓梯與電梯核心；平面配置及房間位置未測繪。
+                    </p>
+                  )}
+                </section>
+              )}
+              {place.parentId ? (
+                <div className="indoor-location">
+                  <MapPin size={14} />
+                  <span>
+                    {byId(place.parentId).name} · {place.floor}
+                    {place.room ? ` · ${place.room}` : ""}
+                    <small>標記呈現所在樓層；房間精確位置未測繪。</small>
+                  </span>
+                  <button onClick={() => select(place.parentId!)}>
+                    查看大樓
+                    <ChevronRight size={13} />
+                  </button>
                 </div>
-              )
-            )}
-            <div className="detail-actions">
-              <button
-                className="primary"
-                onClick={() => {
-                  changeTab("routes");
-                  setFinish(selected);
-                }}
-              >
-                <Route size={16} />
-                規劃參訪
-                <ArrowRight size={16} />
-              </button>
-              <a href={place.source} target="_blank" rel="noreferrer">
-                官方資訊
-                <ArrowUpRight size={15} />
-              </a>
-            </div>
+              ) : (
+                halls.some((h) => h.parentId === place.id) && (
+                  <div className="building-halls">
+                    <span>本棟演講廳與禮堂</span>
+                    <div>
+                      {halls
+                        .filter((h) => h.parentId === place.id)
+                        .map((h) => (
+                          <button key={h.id} onClick={() => select(h.id)}>
+                            {h.room ?? h.floor} · {h.name}
+                            <ChevronRight size={12} />
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )
+              )}
+              <div className="detail-actions">
+                <button
+                  className="primary"
+                  onClick={() => {
+                    changeTab("routes");
+                    setFinish(selected);
+                  }}
+                >
+                  <Route size={16} />
+                  規劃參訪
+                  <ArrowRight size={16} />
+                </button>
+                <a href={place.source} target="_blank" rel="noreferrer">
+                  官方資訊
+                  <ArrowUpRight size={15} />
+                </a>
+              </div>
             </div>
           </article>
           {route.length > 0 && (
-            <section className={`route-player ${routeExpanded?'expanded':''}`} aria-label="參訪路線">
+            <section
+              className={`route-player ${routeExpanded ? "expanded" : ""}`}
+              aria-label="參訪路線"
+            >
               <div className="route-player-head">
                 <span>
                   <Route size={16} />
                   {routeTitle}
                 </span>
-                <button className="mobile-panel-toggle" aria-expanded={routeExpanded} onClick={() => {
-                  setRouteExpanded(!routeExpanded);
-                  setTerrainExpanded(false);
-                }}>
-                  {routeExpanded?'收合路線':'展開路線'} {routeExpanded?<ChevronDown size={14}/>:<ChevronUp size={14}/>}
+                <button
+                  className="mobile-panel-toggle"
+                  aria-expanded={routeExpanded}
+                  onClick={() => {
+                    setRouteExpanded(!routeExpanded);
+                    setTerrainExpanded(false);
+                  }}
+                >
+                  {routeExpanded ? "收合路線" : "展開路線"}{" "}
+                  {routeExpanded ? (
+                    <ChevronDown size={14} />
+                  ) : (
+                    <ChevronUp size={14} />
+                  )}
                 </button>
                 <button
                   className="icon-btn"
@@ -923,19 +1004,23 @@ function App() {
         onClick={(e) => {
           if (e.target === modal.current) setDialog(null);
         }}
-        className={dialog === "map" ? "map-dialog" : ""}
+        className={
+          dialog === "map" ? "map-dialog" : dialog === "iem" ? "iem-dialog" : ""
+        }
       >
         <div className="dialog-head">
           <div>
             <span className="eyebrow">CYUT CAMPUS EXPLORER</span>
             <h2>
-              {dialog === "map"
-                ? "官方校園平面圖"
-                : dialog === "structure"
-                  ? "校園高程與結構依據"
-                  : dialog === "visit"
-                    ? "下一站，朝陽。"
-                    : "關於這份校園導覽"}
+              {dialog === "iem"
+                ? "工業工程與管理系"
+                : dialog === "map"
+                  ? "官方校園平面圖"
+                  : dialog === "structure"
+                    ? "校園高程與結構依據"
+                    : dialog === "visit"
+                      ? "下一站，朝陽。"
+                      : "關於這份校園導覽"}
             </h2>
           </div>
           <button
@@ -946,7 +1031,22 @@ function App() {
             <X />
           </button>
         </div>
-        {dialog === "map" ? (
+        {dialog === "iem" ? (
+          <IemGuide
+            onLocate={(resource) => {
+              setDialog(null);
+              setSidebar(false);
+              setCategory("全部");
+              setQuery("");
+              setLabels(true);
+              select(resource.id);
+              setSectionFloor(parseInt(resource.floor));
+              setToast(
+                `${resource.room} · 理工大樓 ${resource.floor}；室內座標示意`,
+              );
+            }}
+          />
+        ) : dialog === "map" ? (
           <>
             <div className="map-dialog-tools">
               <span>圖像來源：朝陽科技大學官方網站</span>

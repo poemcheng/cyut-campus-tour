@@ -1,4 +1,6 @@
+import { iemResources } from "./iem.ts";
 export type Category =
+  | "工管系資源"
   | "學習空間"
   | "行政服務"
   | "生活機能"
@@ -484,7 +486,24 @@ export const halls: Place[] = hallSpecs.map((spec) => {
     aliases: ["演講廳", "禮堂", "會議廳", parent.name],
   };
 });
-export const places: Place[] = [...campusPlaces, ...halls];
+export const iemPlaces: Place[] = iemResources
+  .filter((r) => r.parentId)
+  .map((r) => ({
+    ...campusPlaces.find((p) => p.id === r.parentId)!,
+    id: r.id,
+    name: r.name,
+    en: `Industrial Engineering & Management · ${r.room}`,
+    category: "工管系資源",
+    parentId: r.parentId,
+    floor: r.floor,
+    room: r.room,
+    code: r.room,
+    description: r.learn,
+    source: r.source,
+    highlights: [r.room, r.floor, ...r.equipment],
+    aliases: ["工管系", "工業工程與管理系", "實驗室", ...r.equipment],
+  }));
+export const places: Place[] = [...campusPlaces, ...halls, ...iemPlaces];
 export function matchesPlace(p: Place, query: string) {
   const normalize = (s: string) => s.toLowerCase().replace(/[\s\-－–]/g, "");
   return normalize(
@@ -499,6 +518,7 @@ export function matchesPlace(p: Place, query: string) {
   ).includes(normalize(query));
 }
 export const categories: Category[] = [
+  "工管系資源",
   "演講廳與禮堂",
   "學習空間",
   "行政服務",
@@ -507,6 +527,7 @@ export const categories: Category[] = [
   "交通入口",
 ];
 export const categoryColor: Record<Category, string> = {
+  工管系資源: "#548e83",
   演講廳與禮堂: "#b1844c",
   學習空間: "#b6b5a1",
   行政服務: "#c9ad87",
