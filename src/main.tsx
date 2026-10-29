@@ -17,6 +17,8 @@ import {
   Leaf,
   Sun,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   X,
   Play,
   Pause,
@@ -73,6 +75,9 @@ function App() {
     [sectionFloor, setSectionFloor] = useState<number | null>(null),
     [routeMode, setRouteMode] = useState<RouteMode>("walk"),
     [structureTags, setStructureTags] = useState(true);
+  const [detailExpanded, setDetailExpanded] = useState(false),
+    [terrainExpanded, setTerrainExpanded] = useState(false),
+    [routeExpanded, setRouteExpanded] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const d = JSON.parse(localStorage.getItem("cyut-favorites") ?? "[]");
@@ -148,6 +153,8 @@ function App() {
   }, []);
   useEffect(() => () => window.speechSynthesis?.cancel(), []);
   function select(id: string, focus = true) {
+    setDetailExpanded(false);
+    setTerrainExpanded(false);
     if ((byId(id).parentId ?? id) !== buildingId) setSectionFloor(null);
     setSelected(id);
     if (focus) scene.current?.focus(id);
@@ -160,6 +167,9 @@ function App() {
     setSidebar(true);
   }
   function beginRoute(ids: string[], title: string) {
+    setDetailExpanded(false);
+    setTerrainExpanded(false);
+    setRouteExpanded(false);
     setSectionFloor(null);
     setRoute(ids);
     setRouteTitle(title);
@@ -555,16 +565,24 @@ function App() {
             </div>
             <button
               className={`label-toggle ${labels ? "active" : ""}`}
+              aria-label="地點標籤"
               aria-pressed={labels}
               onClick={() => setLabels(!labels)}
             >
               <Layers size={15} />
-              地點標籤
+              <span>地點標籤</span>
             </button>
           </div>
-          <section className={`terrain-panel ${sectionFloor!==null||route.length>0?'compact':''}`} aria-label="地形高程控制">
+          <section className={`terrain-panel ${!terrainExpanded&&(sectionFloor!==null||route.length>0)?'compact':''} ${terrainExpanded?'mobile-expanded':''}`} aria-label="地形高程控制">
             <div>
               <strong>階地校園</strong>
+              <button className="mobile-panel-toggle terrain-toggle" aria-expanded={terrainExpanded} aria-label={terrainExpanded?'收合地形控制':'展開地形控制'} onClick={() => {
+                setTerrainExpanded(!terrainExpanded);
+                setDetailExpanded(false);
+                setRouteExpanded(false);
+              }}>
+                {terrainExpanded?'收合地形':'地形'} {terrainExpanded?<ChevronUp size={14}/>:<ChevronDown size={14}/>}
+              </button>
               <button onClick={() => setDialog("structure")}>
                 圖資與推估 <Info size={12} />
               </button>
@@ -642,12 +660,19 @@ function App() {
             <Compass size={29} strokeWidth={1} />
             <span>依校園圖配置</span>
           </div>
-          <article className="detail-card" key={selected}>
+          <article className={`detail-card ${detailExpanded?'expanded':''}`} key={selected} aria-label="地點詳情">
             <div className="detail-overline">
               <span>
                 <i style={{ background: categoryColor[place.category] }} />
                 {place.category}
               </span>
+              <div className="detail-controls">
+              <button className="mobile-panel-toggle" aria-expanded={detailExpanded} aria-controls="place-detail-body" onClick={() => {
+                setDetailExpanded(!detailExpanded);
+                setTerrainExpanded(false);
+              }}>
+                {detailExpanded?'收合詳情':'展開詳情'} {detailExpanded?<ChevronDown size={15}/>:<ChevronUp size={15}/>}
+              </button>
               <button
                 aria-label={
                   favorites.includes(selected) ? "取消收藏" : "收藏此地點"
@@ -661,6 +686,7 @@ function App() {
                   fill={favorites.includes(selected) ? "currentColor" : "none"}
                 />
               </button>
+              </div>
             </div>
             <div className="detail-title">
               <span>{String(places.indexOf(place) + 1).padStart(2, "0")}</span>
@@ -669,6 +695,7 @@ function App() {
                 <small>{place.en}</small>
               </h2>
             </div>
+            <div className="detail-body" id="place-detail-body">
             <p>{place.description}</p>
             <div className="highlights">
               {place.highlights.map((h) => (
@@ -771,14 +798,21 @@ function App() {
                 <ArrowUpRight size={15} />
               </a>
             </div>
+            </div>
           </article>
           {route.length > 0 && (
-            <section className="route-player" aria-label="參訪路線">
+            <section className={`route-player ${routeExpanded?'expanded':''}`} aria-label="參訪路線">
               <div className="route-player-head">
                 <span>
                   <Route size={16} />
                   {routeTitle}
                 </span>
+                <button className="mobile-panel-toggle" aria-expanded={routeExpanded} onClick={() => {
+                  setRouteExpanded(!routeExpanded);
+                  setTerrainExpanded(false);
+                }}>
+                  {routeExpanded?'收合路線':'展開路線'} {routeExpanded?<ChevronDown size={14}/>:<ChevronUp size={14}/>}
+                </button>
                 <button
                   className="icon-btn"
                   aria-label="關閉路線"

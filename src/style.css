@@ -683,7 +683,7 @@ button {
   color: #9ba38e;
   margin-top: 6px;
 }
-.detail-card > p {
+.detail-body > p {
   font-size: 10px;
   line-height: 1.95;
   color: #7f8b73;
@@ -1236,7 +1236,7 @@ dialog::backdrop {
     width: 320px;
     padding: 23px;
   }
-  .detail-card > p {
+  .detail-body > p {
     font-size: 11px;
   }
   .detail-title h2 {
@@ -1297,7 +1297,7 @@ dialog::backdrop {
   .detail-title h2 {
     font-size: 18px;
   }
-  .detail-card > p {
+  .detail-body > p {
     font-size: 9px;
   }
   .route-player {
@@ -1425,7 +1425,7 @@ dialog::backdrop {
   .detail-title small {
     font-size: 8px;
   }
-  .detail-card > p {
+  .detail-body > p {
     font-size: 10px;
     margin: 11px 0;
     max-width: 550px;
@@ -1593,7 +1593,7 @@ dialog::backdrop {
     padding-bottom: 14px;
   }
 }
-.detail-card > p {
+.detail-body > p {
   font-size: 11px;
 }
 @media (max-width: 800px) {
@@ -1606,7 +1606,7 @@ dialog::backdrop {
   .map-legend {
     display: none;
   }
-  .detail-card > p {
+  .detail-body > p {
     font-size: 11px;
   }
 }
@@ -1993,3 +1993,90 @@ dialog::backdrop {
   }
 }
 .terrain-panel.compact > :not(:first-child) { display: none; }
+.mobile-panel-toggle { display: none; }
+.terrain-panel .terrain-toggle { display: none; }
+.detail-controls { display: flex; align-items: center; gap: 8px; }
+@media (max-width: 800px) {
+  .app { height: 100dvh; min-height: 0; overflow: hidden; }
+  .header { height: 60px; flex: 0 0 60px; padding: 0 12px; }
+  .brand strong { font-size: 19px; letter-spacing: 2px; }
+  .brand-mark { width: 31px; height: 35px; }
+  .brand small { font-size: 5px; }
+  .header-right { gap: 7px; }
+  .official-map { font-size: 9px; padding: 8px 6px; }
+  .workspace { flex: 1; min-height: 0; }
+  .footer, .map-bottom { display: none; }
+  .sidebar { position: fixed; top: 60px; bottom: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .sidebar-top { padding: 16px 22px; }
+  .sidebar-top h1 { font-size: 23px; line-height: 1.4; margin: 8px 0; }
+  .sidebar-top p { display: none; }
+  .search input { font-size: 16px; }
+  .custom-route select { font-size: 16px; }
+  .scene { inset: 0; }
+  .map-heading { top: 12px; left: 14px; }
+  .map-heading .eyebrow { display: none; }
+  .map-heading h2 { font-size: 18px; margin: 0 0 5px; }
+  .map-sub { font-size: 8px; }
+  .map-topright { top: 64px; right: 12px; flex-direction: row; gap: 5px; align-items: center; }
+  .view-toggle button { font-size: 10px; min-height: 36px; padding: 6px 8px; }
+  .label-toggle { width: 40px; height: 44px; justify-content: center; padding: 0; }
+  .label-toggle > span { display: none; }
+  .map-tools { top: 120px; right: 12px; flex-direction: row; padding: 1px; }
+  .map-tools button { width: 36px; height: 36px; }
+  .map-tools > span { width: 1px; height: 25px; margin: 5px 0; }
+  .mobile-panel-toggle { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 12px; min-height: 36px; padding: 4px 6px; color: var(--green); }
+  .terrain-panel { top: 64px; left: 12px; width: 70px; padding: 0 4px; z-index: 12; }
+  .terrain-panel > div:first-child > strong,
+  .terrain-panel > div:first-child > button:not(.terrain-toggle),
+  .terrain-panel > :not(:first-child) { display: none; }
+  .terrain-panel > div:first-child .terrain-toggle { display: flex; min-height: 42px; font-size: 12px; color: var(--green); }
+  .terrain-panel.mobile-expanded { width: min(265px, calc(100% - 24px)); padding: 8px 12px 12px; max-height: calc(100% - 238px); overflow: auto; }
+  .terrain-panel.mobile-expanded > div:first-child > button:not(.terrain-toggle) { display: flex; font-size: 11px; }
+  .terrain-panel.mobile-expanded > .elevation-steps { display: flex; }
+  .terrain-panel.mobile-expanded > label { display: flex; font-size: 11px; }
+  .terrain-panel.mobile-expanded > .structure-tag-toggle { display: block; font-size: 12px; min-height: 36px; }
+  .terrain-panel.mobile-expanded > p { display: block; font-size: 10px; }
+  .terrain-panel select { font-size: 16px; max-width: 150px; }
+  .elevation-steps small { font-size: 9px; }
+  .detail-card { left: 12px; right: 12px; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); padding: 8px 12px 12px; max-height: min(56dvh, calc(100% - 118px)); display: flex; flex-direction: column; overflow: hidden; animation: none; }
+  .detail-overline, .detail-title { flex-shrink: 0; }
+  .detail-overline { margin: 0 0 2px; min-height: 36px; }
+  .detail-overline > span { font-size: 10px; }
+  .detail-controls { gap: 2px; }
+  .detail-title h2 { font-size: 18px; line-height: 1.4; }
+  .detail-title small { display: none; }
+  .detail-card .heart { min-width: 36px; min-height: 36px; }
+  .detail-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 2px 4px; margin-top: 6px; }
+  .detail-card:not(.expanded) .detail-body { display: none; }
+  .detail-body > p { font-size: 12px; line-height: 1.8; }
+  .highlights span { font-size: 10px; }
+  .structure-card label { font-size: 12px; }
+  .structure-card select { font-size: 16px; max-width: 60%; }
+  .structure-card > button { font-size: 12px; min-height: 40px; }
+  .structure-card > small, .structure-card > p { font-size: 10px; }
+  .building-halls button, .detail-actions a { font-size: 12px; min-height: 40px; }
+  .mobile-explore { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); height: 42px; font-size: 12px; padding: 8px 18px; }
+  .map-area:has(.route-player) .detail-card { display: none; }
+  .route-player { left: 12px; right: 12px; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); max-height: min(55dvh, calc(100% - 118px)); overflow-y: auto; overscroll-behavior: contain; padding: 8px 12px; }
+  .route-player-head { position: sticky; top: -8px; background: #fafbf6; z-index: 1; }
+  .route-player-head > span { flex: 1; font-size: 11px; min-width: 0; }
+  .route-player-head > .icon-btn { min-height: 36px; min-width: 30px; }
+  .route-player:not(.expanded) .route-stops,
+  .route-player:not(.expanded) .route-mode-control,
+  .route-player:not(.expanded) .route-height-note { display: none; }
+  .route-stops > button { font-size: 11px; min-height: 34px; }
+  .route-mode-control button { font-size: 11px; min-height: 36px; }
+  .route-height-note { font-size: 10px !important; }
+}
+@media (max-width: 360px) {
+  .view-toggle button { padding: 6px; font-size: 9px; }
+  .map-topright { gap: 3px; }
+  .detail-title h2 { font-size: 16px; }
+}
+@media (max-height: 500px) and (max-width: 800px) {
+  .map-heading { display: none; }
+  .map-topright, .terrain-panel { top: 10px; }
+  .map-tools { top: 64px; }
+  .detail-card { max-height: calc(100% - 76px); }
+  .terrain-panel.mobile-expanded { max-height: calc(100% - 120px); }
+}
